@@ -6,7 +6,7 @@
 /*   By: juhallyn <juhallyn@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/06/06 20:29:21 by juhallyn          #+#    #+#             */
-/*   Updated: 2017/07/18 17:39:23 by juhallyn         ###   ########.fr       */
+/*   Updated: 2017/07/22 16:11:45 by juhallyn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,19 @@ static char		*ft_chr2(const char *s, int tf, char **chptr)
 	return (NULL);
 }
 
-int				get_next_line(int const fd, char **line)
+static int		check_and_dup(char **str, char **line)
+{
+	if (ft_strlen(*str) == 0)
+	{
+		ft_strdel(str);
+		return (0);
+	}
+	*line = ft_strdup(*str);
+	ft_strdel(str);
+	return (1);
+}
+
+int				get_next_line(const int fd, char **line)
 {
 	static	char	*str = NULL;
 	int				ret;
@@ -76,19 +88,9 @@ int				get_next_line(int const fd, char **line)
 	if (ret == -1)
 		return (-1);
 	else if (str && !chptr && *buff != '\0')
-	{
-		if (ft_strlen(str) == 0)
-		{
-			ft_strdel(&str);
-			return (0);
-		}
-		*line = ft_strdup(str);
-		ft_strdel(&str);
-		return (1);
-	}
+		return (check_and_dup(&str, line));
 	if (str && ret != 0)
 		return (init_line(&str, line, chptr, ret));
-	return (0);
 }
 
 int		main(int argc, char **argv)
@@ -101,7 +103,6 @@ int		main(int argc, char **argv)
 	{
 		ft_putendl(line);
 		ft_strdel(&line);
-		// sleep(1);
 	}
 	return (0);
 }
