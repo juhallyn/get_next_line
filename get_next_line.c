@@ -6,11 +6,10 @@
 /*   By: juhallyn <juhallyn@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/06/06 20:29:21 by juhallyn          #+#    #+#             */
-/*   Updated: 2017/07/22 16:11:45 by juhallyn         ###   ########.fr       */
+/*   Updated: 2017/07/22 16:15:25 by juhallyn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdio.h>
 #include "get_next_line.h"
 
 static int		init_line(char **str, char **line, char *chptr, int ret)
@@ -91,18 +90,4 @@ int				get_next_line(const int fd, char **line)
 		return (check_and_dup(&str, line));
 	if (str && ret != 0)
 		return (init_line(&str, line, chptr, ret));
-}
-
-int		main(int argc, char **argv)
-{
-	char		*line;
-	const int	fd = open(argv[1], O_RDONLY);
-
-	line = NULL;
-	while (get_next_line(fd, &line))
-	{
-		ft_putendl(line);
-		ft_strdel(&line);
-	}
-	return (0);
 }
