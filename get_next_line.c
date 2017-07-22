@@ -3,46 +3,91 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: juhallyn <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: juhallyn <juhallyn@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2017/07/17 15:57:51 by juhallyn          #+#    #+#             */
-/*   Updated: 2017/07/21 16:49:59 by juhallyn         ###   ########.fr       */
+/*   Created: 2017/06/06 20:29:21 by juhallyn          #+#    #+#             */
+/*   Updated: 2017/07/18 17:39:23 by juhallyn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "./get_next_line.h"
 #include <stdio.h>
-	//printf("%s",  str);
+#include "get_next_line.h"
 
-int		init_line(char *str, char *chptr, char **line, int ret)
+static int		init_line(char **str, char **line, char *chptr, int ret)
 {
-	*line = ft_strsub(str, 0, chptr - str);
-	ft_putendl(*line);
-	str = chptr;
-	return (0);
+	char *tmp;
+
+	tmp = *str;
+	*line = ft_strsub(*str, 0, chptr - *str);
+	*str = ft_strdup(chptr + 1);
+	ft_strdel(&tmp);
+	return (1);
 }
 
-int		get_next_line(const int fd, char **line)
+static char		*ft_chr2(const char *s, int tf, char **chptr)
 {
-	static char		*str = NULL;
+	char	*sptr;
+	int		i;
+	char	c;
+
+	i = 0;
+	if (!s)
+		return (NULL);
+	sptr = (char *)s;
+	c = (char)tf;
+	if (*sptr == c)
+	{
+		*chptr = sptr;
+		return (sptr);
+	}
+	while (sptr[i++])
+	{
+		if (sptr[i] == c)
+		{
+			*chptr = &sptr[i];
+			return (&sptr[i]);
+		}
+	}
+	*chptr = NULL;
+	return (NULL);
+}
+
+int				get_next_line(int const fd, char **line)
+{
+	static	char	*str = NULL;
 	int				ret;
 	char			buff[BUFF_SIZE + 1];
 	char			*chptr;
 	char			*memory;
 
-	if (fd < 0)
+	chptr = NULL;
+	memory = NULL;
+	if (fd == -1)
 		return (-1);
-	while ((ret = read(fd, buff, BUFF_SIZE)))
+	while (!(ft_chr2(str, '\n', &chptr)) && (ret = read(fd, buff, BUFF_SIZE)))
 	{
 		if (ret == -1)
 			return (-1);
 		buff[ret] = '\0';
 		memory = str;
 		str = ft_strjoin(str, buff);
-		chptr = ft_strchr(str, '\n');
-		if (chptr)
-			return (init_line(str, chptr, line, ret));
+		ft_strdel(&memory);
 	}
+	if (ret == -1)
+		return (-1);
+	else if (str && !chptr && *buff != '\0')
+	{
+		if (ft_strlen(str) == 0)
+		{
+			ft_strdel(&str);
+			return (0);
+		}
+		*line = ft_strdup(str);
+		ft_strdel(&str);
+		return (1);
+	}
+	if (str && ret != 0)
+		return (init_line(&str, line, chptr, ret));
 	return (0);
 }
 
@@ -51,7 +96,12 @@ int		main(int argc, char **argv)
 	char		*line;
 	const int	fd = open(argv[1], O_RDONLY);
 
-	get_next_line(fd, &line);
-	get_next_line(fd, &line);
+	line = NULL;
+	while (get_next_line(fd, &line))
+	{
+		ft_putendl(line);
+		ft_strdel(&line);
+		// sleep(1);
+	}
 	return (0);
 }
